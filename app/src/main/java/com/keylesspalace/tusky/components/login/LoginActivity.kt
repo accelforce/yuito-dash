@@ -107,7 +107,8 @@ class LoginActivity : BaseActivity() {
             binding.domainEditText.isEnabled = false
         }
 
-        binding.loginButton.setOnClickListener { onLoginClick(true) }
+        binding.loginButton.setOnClickListener { onLoginClick(false) }
+        binding.loginInAppButton.setOnClickListener { onLoginClick(true) }
 
         binding.whatsAnInstanceTextView.setOnClickListener {
             val dialog = MaterialAlertDialogBuilder(this)
