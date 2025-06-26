@@ -126,15 +126,14 @@ class ProvidesMastodonStreaming @Inject constructor(
                     when (it) {
                         is WebSocketEvent.OnConnectionOpened -> {
                             Log.d(TAG, "WebSocket connection opened")
+                            subscribed = emptySet()
                             updateSubscriptions(activeAccount)
                         }
                         is WebSocketEvent.OnConnectionClosed -> {
                             Log.d(TAG, "WebSocket connection closed: ${it.shutdownReason.code} - ${it.shutdownReason.reason}")
-                            subscribed = emptySet()
                         }
                         is WebSocketEvent.OnConnectionFailed -> {
                             Log.w(TAG, "WebSocket connection failed", it.throwable)
-                            subscribed = emptySet()
                         }
                         else -> {}
                     }
