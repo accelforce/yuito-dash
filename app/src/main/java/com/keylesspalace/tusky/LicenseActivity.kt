@@ -75,13 +75,16 @@ class LicenseActivity : BaseActivity() {
         setContent {
             TuskyTheme {
                 var apache2License by remember { mutableStateOf("") }
+                var scarletLicense by remember { mutableStateOf("") }
 
                 LaunchedEffect(Unit) {
                     apache2License = loadFileContent(R.raw.apache)
+                    scarletLicense = loadFileContent(R.raw.license_scarlet)
                 }
 
                 LicenseActivityContent(
                     apache2License = apache2License,
+                    scarletLicense = scarletLicense,
                     onBack = { finish() }
                 )
             }
@@ -102,6 +105,7 @@ class LicenseActivity : BaseActivity() {
 @Composable
 private fun LicenseActivityContent(
     apache2License: String,
+    scarletLicense: String,
     onBack: () -> Unit,
 ) {
     Scaffold(
@@ -244,6 +248,15 @@ private fun LicenseActivityContent(
                     }
                 }
 
+                if (!scarletLicense.isEmpty()) {
+                    item(
+                        key = "scarlet",
+                        span = StaggeredGridItemSpan.FullLine
+                    ) {
+                        Text(scarletLicense)
+                    }
+                }
+
                 item(
                     key = "bottomSpacer",
                     span = StaggeredGridItemSpan.FullLine
@@ -283,6 +296,7 @@ fun LicenseContentPreview() {
     TuskyPreviewTheme {
         LicenseActivityContent(
             apache2License = "some license text",
+            scarletLicense = "some license text",
             onBack = { }
         )
     }

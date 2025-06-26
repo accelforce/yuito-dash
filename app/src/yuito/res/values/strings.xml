@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_login_in_app">Login in app</string>
+
+    <string name="pref_title_networking_settings">Networking</string>
+    <string name="pref_title_networking_global_streaming">Enable streaming</string>
+    <string name="pref_summary_networking_global_streaming">
+        Automatically updates timelines, notifications, announcements, and filters (when the app is on the foreground).
+        Each tabs can be configured individually in [Account preferences].
+    </string>
+
+    <string name="license_below">A copy of the license is below</string>
 </resources>

@@ -69,3 +69,11 @@
 
 # https://codeberg.org/tusky/Tusky/pulls/5172
 -keep class androidx.appcompat.app.AppLocalesMetadataHolderService
+
+# Scarlet -- Keep WebSocket annotations
+-keep class kotlinx.coroutines.flow.Flow { *; }
+-if interface * { @com.tinder.scarlet.ws.* <methods>; }
+-keep,allowobfuscation interface <1>
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @com.tinder.scarlet.ws.* <methods>;
+}

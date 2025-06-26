@@ -217,6 +217,7 @@ dependencies {
 
     implementation libs.bundles.okhttp
     implementation libs.okio
+    implementation yLibs.bundles.scarlet
 
     implementation libs.conscrypt.android
 

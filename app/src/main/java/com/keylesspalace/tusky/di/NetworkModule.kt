@@ -21,6 +21,9 @@ import android.os.Build
 import android.util.Log
 import at.connyduck.calladapter.networkresult.NetworkResultCallAdapterFactory
 import com.keylesspalace.tusky.BuildConfig
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
+import com.keylesspalace.tusky.components.streaming.ProvidesMastodonStreaming
+import com.keylesspalace.tusky.components.streaming.StreamingEventAdapter
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.entity.Attachment
 import com.keylesspalace.tusky.entity.Notification
@@ -88,6 +91,7 @@ object NetworkModule {
             EnumJsonAdapter.create(Status.Visibility::class.java)
                 .withUnknownFallback(Status.Visibility.UNKNOWN)
         )
+        .add(StreamingEventAdapter.Factory)
         .build()
 
     @Provides
@@ -169,4 +173,10 @@ object NetworkModule {
 
         return apiForAccount(accountManager.activeAccount, longTimeOutOkHttpClient, retrofit)
     }
+
+    @Provides
+    @Singleton
+    fun providesMastodonStreaming(
+        provides: ProvidesMastodonStreaming,
+    ): MastodonStreaming = provides.get()
 }

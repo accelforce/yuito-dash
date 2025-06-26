@@ -36,6 +36,11 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
+    versionCatalogs {
+        yLibs {
+            from files('gradle/yLibs.versions.toml')
+        }
+    }
 }
 
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

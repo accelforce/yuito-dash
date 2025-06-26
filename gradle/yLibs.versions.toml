@@ -1,0 +1,18 @@
+[versions]
+scarlet = "0.2.5-1"
+
+[libraries]
+scarlet = { module = "com.github.kyori19.Scarlet:scarlet", version.ref = "scarlet" }
+scarlet-lifecycle-android = { module = "com.github.kyori19.Scarlet:scarlet-lifecycle-android", version.ref = "scarlet" }
+scarlet-message-adapter-moshi = { module = "com.github.kyori19.Scarlet:scarlet-message-adapter-moshi", version.ref = "scarlet" }
+scarlet-protocol-websocket-okhttp = { module = "com.github.kyori19.Scarlet:scarlet-protocol-websocket-okhttp", version.ref = "scarlet" }
+scarlet-stream-adapter-coroutines = { module = "com.github.kyori19.Scarlet:scarlet-stream-adapter-coroutines", version.ref = "scarlet" }
+
+[bundles]
+scarlet = [
+    "scarlet",
+    "scarlet-lifecycle-android",
+    "scarlet-message-adapter-moshi",
+    "scarlet-protocol-websocket-okhttp",
+    "scarlet-stream-adapter-coroutines"
+]

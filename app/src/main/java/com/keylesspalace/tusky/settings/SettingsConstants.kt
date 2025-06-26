@@ -59,6 +59,8 @@ object PrefKeys {
     const val SCHEMA_VERSION: String = "schema_version"
     const val LAST_USED_PUSH_PROVIDER = "lastUsedPushProvider"
 
+    const val GLOBAL_STREAMING_ENABLED = "globalStreamingEnabled"
+
     const val APP_THEME = "appTheme"
     const val LANGUAGE = "language"
     const val STATUS_TEXT_SIZE = "statusTextSize"

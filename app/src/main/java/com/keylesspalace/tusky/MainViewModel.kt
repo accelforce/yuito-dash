@@ -24,6 +24,8 @@ import com.keylesspalace.tusky.appstore.ConversationsLoadingEvent
 import com.keylesspalace.tusky.appstore.EventHub
 import com.keylesspalace.tusky.appstore.NewNotificationsEvent
 import com.keylesspalace.tusky.appstore.NotificationsLoadingEvent
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
+import com.keylesspalace.tusky.components.streaming.StreamingEvent
 import com.keylesspalace.tusky.components.systemnotifications.NotificationHelper
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.entity.Emoji
@@ -46,6 +48,7 @@ import retrofit2.HttpException
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val api: MastodonApi,
+    private val streaming: MastodonStreaming,
     private val eventHub: EventHub,
     private val accountManager: AccountManager,
     private val shareShortcutHelper: ShareShortcutHelper,
@@ -88,6 +91,7 @@ class MainViewModel @Inject constructor(
         loadAccountData()
         fetchAnnouncements()
         collectEvents()
+        collectStreamingEvents()
     }
 
     private fun loadAccountData() {
@@ -151,6 +155,20 @@ class MainViewModel @Inject constructor(
                     is ConversationsLoadingEvent -> {
                         if (event.accountId == activeAccount.accountId) {
                             accountManager.updateAccount(activeAccount) { copy(hasDirectMessageBadge = false) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun collectStreamingEvents() {
+        viewModelScope.launch {
+            streaming.events().collect { event ->
+                when (event) {
+                    is StreamingEvent.Notification -> {
+                        if (notificationHelper.areNotificationsEnabledBySystem()) {
+                            notificationHelper.fetchNotificationsOnPushMessage(activeAccount)
                         }
                     }
                 }
