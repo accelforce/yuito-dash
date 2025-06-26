@@ -162,6 +162,14 @@ class MainViewModel @Inject constructor(
                             notificationService.fetchNotificationsOnPushMessage(activeAccount)
                         }
                     }
+                    is StreamingEvent.Announcement -> {
+                        if (!event.announcement.read) {
+                            _unreadAnnouncementsCount.value++
+                        }
+                    }
+                    is StreamingEvent.AnnouncementDeleted -> {
+                        fetchAnnouncements()
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.keylesspalace.tusky.components.streaming
 
+import com.keylesspalace.tusky.entity.Announcement
 import com.keylesspalace.tusky.entity.Notification
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
@@ -27,6 +28,17 @@ class StreamingEventAdapter(private val moshi: Moshi) : JsonAdapter<StreamingEve
                 val notification = inner.fromJson(raw.payload ?: return null)
                     ?: return null
                 StreamingEvent.Notification(notification)
+            }
+            "announcement" -> {
+                val inner = moshi.adapter(Announcement::class.java)
+                val announcement = inner.fromJson(raw.payload ?: return null)
+                    ?: return null
+                StreamingEvent.Announcement(announcement)
+            }
+            "announcement.delete" -> {
+                StreamingEvent.AnnouncementDeleted(
+                    id = raw.payload ?: return null,
+                )
             }
             else -> {
                 null
