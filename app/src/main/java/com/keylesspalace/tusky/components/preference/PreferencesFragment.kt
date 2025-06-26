@@ -240,6 +240,15 @@ class PreferencesFragment : BasePreferencesFragment() {
                 }
             }
 
+            preferenceCategory(R.string.pref_title_networking_settings) {
+                switchPreference {
+                    title = getString(R.string.pref_title_networking_global_streaming)
+                    summary = getString(R.string.pref_summary_networking_global_streaming)
+                    key = PrefKeys.GLOBAL_STREAMING_ENABLED
+                    setDefaultValue(false)
+                }
+            }
+
             preferenceCategory(R.string.pref_title_browser_settings) {
                 switchPreference {
                     setDefaultValue(false)

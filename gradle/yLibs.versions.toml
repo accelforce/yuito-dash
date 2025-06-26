@@ -1,0 +1,18 @@
+[versions]
+scarlet = "0.2.5-SNAPSHOT"
+
+[libraries]
+scarlet = { module = "com.tinder.scarlet:scarlet", version.ref = "scarlet" }
+scarlet-lifecycle-android = { module = "com.tinder.scarlet:lifecycle-android", version.ref = "scarlet" }
+scarlet-message-adapter-moshi = { module = "com.tinder.scarlet:message-adapter-moshi", version.ref = "scarlet" }
+scarlet-protocol-websocket-okhttp = { module = "com.tinder.scarlet:protocol-websocket-okhttp", version.ref = "scarlet" }
+scarlet-stream-adapter-coroutines = { module = "com.tinder.scarlet:stream-adapter-coroutines", version.ref = "scarlet" }
+
+[bundles]
+scarlet = [
+    "scarlet",
+    "scarlet-lifecycle-android",
+    "scarlet-message-adapter-moshi",
+    "scarlet-protocol-websocket-okhttp",
+    "scarlet-stream-adapter-coroutines"
+]

@@ -49,7 +49,7 @@ data class Instance(
         val translation: Translation? = null,
     ) {
         @JsonClass(generateAdapter = true)
-        data class Urls(@Json(name = "streaming_api") val streamingApi: String? = null)
+        data class Urls(@Json(name = "streaming") val streaming: String? = null)
 
         @JsonClass(generateAdapter = true)
         data class Accounts(

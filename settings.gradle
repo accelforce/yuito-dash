@@ -35,6 +35,12 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+    versionCatalogs {
+        yLibs {
+            from files('gradle/yLibs.versions.toml')
+        }
     }
 }
 

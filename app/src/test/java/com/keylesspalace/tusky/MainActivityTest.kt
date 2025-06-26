@@ -164,6 +164,7 @@ class MainActivityTest {
         })
         val viewModel = MainViewModel(
             api = api,
+            streaming = mock(),
             eventHub = eventHub,
             accountManager = accountManager,
             shareShortcutHelper = mock(),

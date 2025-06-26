@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_login_in_app">アプリ内でログイン</string>
+
+    <string name="pref_title_networking_settings">ネットワーク</string>
+    <string name="pref_title_networking_global_streaming">ストリーミングを使用する</string>
+    <string name="pref_summary_networking_global_streaming">
+        アプリの起動中、タイムライン・通知・お知らせ・フィルターを自動更新します。
+        [アカウント設定]でタブごとに個別に切り替えできます。
+    </string>
 </resources>
