@@ -15,4 +15,6 @@ sealed class StreamingEvent(val stream: StreamType) {
     data class AnnouncementDeleted(
         val id: String,
     ) : StreamingEvent(StreamType.User)
+
+    object FilterUpdated : StreamingEvent(StreamType.User)
 }
