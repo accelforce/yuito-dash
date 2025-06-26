@@ -40,6 +40,9 @@ class StreamingEventAdapter(private val moshi: Moshi) : JsonAdapter<StreamingEve
                     id = raw.payload ?: return null,
                 )
             }
+            "filters_changed" -> {
+                StreamingEvent.FilterUpdated
+            }
             else -> {
                 null
             }

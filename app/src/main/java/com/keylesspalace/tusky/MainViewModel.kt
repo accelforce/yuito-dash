@@ -22,6 +22,7 @@ import at.connyduck.calladapter.networkresult.fold
 import com.keylesspalace.tusky.appstore.AnnouncementReadEvent
 import com.keylesspalace.tusky.appstore.ConversationsLoadingEvent
 import com.keylesspalace.tusky.appstore.EventHub
+import com.keylesspalace.tusky.appstore.FilterUpdatedEvent
 import com.keylesspalace.tusky.appstore.NewNotificationsEvent
 import com.keylesspalace.tusky.appstore.NotificationsLoadingEvent
 import com.keylesspalace.tusky.components.streaming.MastodonStreaming
@@ -29,6 +30,7 @@ import com.keylesspalace.tusky.components.streaming.StreamingEvent
 import com.keylesspalace.tusky.components.systemnotifications.NotificationHelper
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.entity.Emoji
+import com.keylesspalace.tusky.entity.Filter
 import com.keylesspalace.tusky.entity.Notification
 import com.keylesspalace.tusky.entity.Status
 import com.keylesspalace.tusky.network.MastodonApi
@@ -178,6 +180,9 @@ class MainViewModel @Inject constructor(
                     }
                     is StreamingEvent.AnnouncementDeleted -> {
                         fetchAnnouncements()
+                    }
+                    is StreamingEvent.FilterUpdated -> {
+                        eventHub.dispatch(FilterUpdatedEvent(Filter.Kind.entries))
                     }
                 }
             }
