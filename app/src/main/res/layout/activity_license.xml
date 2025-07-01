@@ -216,8 +216,27 @@
                 license:link="https://github.com/tuskyapp/artwork"
                 license:name="Tusky elephant artwork" />
 
+            <com.keylesspalace.tusky.view.LicenseCard
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="12dp"
+                license:license="@string/license_below"
+                license:link="https://github.com/Tinder/Scarlet"
+                license:name="Scarlet" />
+
             <TextView
                 android:id="@+id/licenseApacheTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="18dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/licenseScarletTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="18dp"

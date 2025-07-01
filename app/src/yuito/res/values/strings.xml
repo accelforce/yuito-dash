@@ -8,4 +8,6 @@
         Automatically updates timelines, notifications, announcements, and filters (when the app is on the foreground).
         Each tabs can be configured individually in [Account preferences].
     </string>
+
+    <string name="license_below">A copy of the license is below</string>
 </resources>

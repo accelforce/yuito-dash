@@ -56,6 +56,7 @@ class LicenseActivity : BaseActivity() {
         }
 
         loadFileIntoTextView(R.raw.apache, binding.licenseApacheTextView)
+        loadFileIntoTextView(R.raw.license_scarlet, binding.licenseScarletTextView)
     }
 
     private fun loadFileIntoTextView(@RawRes fileId: Int, textView: TextView) {
