@@ -1,9 +1,19 @@
 package com.keylesspalace.tusky.components.streaming
 
+import com.keylesspalace.tusky.entity.Status
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = false)
-sealed class StreamingEvent(val stream: StreamType) {
+sealed class StreamingEvent(open val stream: StreamType) {
+    data class Update(
+        override val stream: StreamType,
+        val status: Status,
+    ) : StreamingEvent(stream)
+
+    data class Conversation(
+        val conversation: com.keylesspalace.tusky.entity.Conversation,
+    ) : StreamingEvent(StreamType.Direct)
+
     data class Notification(
         val notification: com.keylesspalace.tusky.entity.Notification,
     ) : StreamingEvent(StreamType.User)

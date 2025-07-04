@@ -83,6 +83,17 @@ class ConversationsFragment :
 
     private var buttonToAnimate: SparkButton? = null
 
+    private var isStreamingEnabled: Boolean = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val arguments = requireArguments()
+        isStreamingEnabled = arguments.getBoolean(IS_STREAMING_ENABLED, false)
+
+        viewModel.init(isStreamingEnabled, ::refreshContent)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
@@ -400,6 +411,14 @@ class ConversationsFragment :
     }
 
     companion object {
-        fun newInstance() = ConversationsFragment()
+        private const val IS_STREAMING_ENABLED = "isStreamingEnabled"
+
+        fun newInstance(isStreamingEnabled: Boolean): ConversationsFragment {
+            val fragment = ConversationsFragment()
+            val arguments = Bundle()
+            arguments.putBoolean(IS_STREAMING_ENABLED, isStreamingEnabled)
+            fragment.arguments = arguments
+            return fragment
+        }
     }
 }

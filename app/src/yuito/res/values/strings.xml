@@ -9,5 +9,7 @@
         Each tabs can be configured individually in [Account preferences].
     </string>
 
+    <string name="toggle_streaming_title">Streaming</string>
+
     <string name="license_below">A copy of the license is below</string>
 </resources>

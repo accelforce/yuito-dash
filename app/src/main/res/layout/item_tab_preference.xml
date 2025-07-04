@@ -18,7 +18,7 @@
         android:layout_gravity="end"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="@id/textView"
+        app:layout_constraintBottom_toTopOf="@id/chipGroup"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_drag_indicator_24dp"
@@ -36,12 +36,27 @@
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         app:drawableTint="?android:attr/textColorSecondary"
         app:layout_constraintBottom_toTopOf="@id/chipGroup"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/streamingChip"
         app:layout_constraintStart_toEndOf="@id/imageView"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_goneMarginBottom="8dp"
         tools:drawableStart="@drawable/ic_home_24dp_filled"
         tools:text="Home" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/streamingChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/toggle_streaming_title"
+        android:checkable="true"
+        app:chipIcon="@drawable/ic_autorenew_24dp"
+        app:chipIconEnabled="true"
+        app:chipIconTint="@color/textColorPrimary"
+        app:layout_constraintBottom_toTopOf="@id/chipGroup"
+        app:layout_constraintEnd_toStartOf="@id/removeButton"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:checked="true" />
 
     <ImageButton
         android:id="@+id/removeButton"
@@ -52,6 +67,7 @@
         android:layout_marginTop="4dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/action_delete"
+        app:layout_constraintBottom_toTopOf="@id/chipGroup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_close_24dp" />
