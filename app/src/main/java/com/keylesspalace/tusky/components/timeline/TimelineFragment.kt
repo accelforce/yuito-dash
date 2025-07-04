@@ -108,6 +108,7 @@ class TimelineFragment :
     private val binding by viewBinding(FragmentTimelineBinding::bind)
 
     private lateinit var kind: TimelineViewModel.Kind
+    private var isStreamingEnabled: Boolean = false
 
     private var adapter: TimelinePagingAdapter? = null
 
@@ -167,10 +168,12 @@ class TimelineFragment :
         } else {
             listOf()
         }
+        isStreamingEnabled = arguments.getBoolean(IS_STREAMING_ENABLED)
         viewModel.init(
             kind,
             id,
-            tags
+            tags,
+            isStreamingEnabled,
         )
 
         isSwipeToRefreshEnabled = arguments.getBoolean(ARG_ENABLE_SWIPE_TO_REFRESH, true)
@@ -259,7 +262,7 @@ class TimelineFragment :
                 if (firstPos == 0 && positionStart == 0 && adapter.itemCount != itemCount) {
                     binding.recyclerView.post {
                         if (getView() != null) {
-                            if (isSwipeToRefreshEnabled) {
+                            if (isSwipeToRefreshEnabled && !isStreamingEnabled || itemCount > 1) {
                                 binding.recyclerView.scrollBy(
                                     0,
                                     Utils.dpToPx(requireContext(), -30)
@@ -648,28 +651,32 @@ class TimelineFragment :
         private const val KIND_ARG = "kind"
         private const val ID_ARG = "id"
         private const val HASHTAGS_ARG = "hashtags"
+        private const val IS_STREAMING_ENABLED = "isStreamingEnabled"
         private const val ARG_ENABLE_SWIPE_TO_REFRESH = "enableSwipeToRefresh"
 
         fun newInstance(
             kind: TimelineViewModel.Kind,
             hashtagOrId: String? = null,
+            isStreamingEnabled: Boolean = false,
             enableSwipeToRefresh: Boolean = true
         ): TimelineFragment {
             val fragment = TimelineFragment()
-            val arguments = Bundle(3)
+            val arguments = Bundle(4)
             arguments.putString(KIND_ARG, kind.name)
             arguments.putString(ID_ARG, hashtagOrId)
+            arguments.putBoolean(IS_STREAMING_ENABLED, isStreamingEnabled)
             arguments.putBoolean(ARG_ENABLE_SWIPE_TO_REFRESH, enableSwipeToRefresh)
             fragment.arguments = arguments
             return fragment
         }
 
         @JvmStatic
-        fun newHashtagInstance(hashtags: List<String>): TimelineFragment {
+        fun newHashtagInstance(hashtags: List<String>, isStreamingEnabled: Boolean = false): TimelineFragment {
             val fragment = TimelineFragment()
-            val arguments = Bundle(3)
+            val arguments = Bundle(4)
             arguments.putString(KIND_ARG, TimelineViewModel.Kind.TAG.name)
             arguments.putStringArrayList(HASHTAGS_ARG, ArrayList(hashtags))
+            arguments.putBoolean(IS_STREAMING_ENABLED, isStreamingEnabled)
             arguments.putBoolean(ARG_ENABLE_SWIPE_TO_REFRESH, true)
             fragment.arguments = arguments
             return fragment

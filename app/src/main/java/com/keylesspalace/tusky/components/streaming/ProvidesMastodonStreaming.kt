@@ -8,7 +8,6 @@ import at.connyduck.calladapter.networkresult.map
 import com.keylesspalace.tusky.appstore.EventHub
 import com.keylesspalace.tusky.appstore.PreferenceChangedEvent
 import com.keylesspalace.tusky.db.AccountManager
-import com.keylesspalace.tusky.db.entity.AccountEntity
 import com.keylesspalace.tusky.di.ApplicationScope
 import com.keylesspalace.tusky.network.MastodonApi
 import com.keylesspalace.tusky.settings.PrefKeys
@@ -45,16 +44,14 @@ class ProvidesMastodonStreaming @Inject constructor(
     @ApplicationScope private val externalScope: CoroutineScope,
 ) {
 
-    private val activeAccount = accountManager.activeAccount!!
-
     private val request = externalScope.async(start = CoroutineStart.LAZY) {
         val baseUrl = api.getInstance()
             .map { it.configuration?.urls?.streaming ?: "wss://${it.domain}" }
-            .getOrElse { "wss://${activeAccount.domain}" }
+            .getOrElse { "wss://${accountManager.activeAccount!!.domain}" }
 
         Request.Builder()
             .url("$baseUrl/api/v1/streaming")
-            .header("Authorization", "Bearer ${activeAccount.accessToken}")
+            .header("Authorization", "Bearer ${accountManager.activeAccount!!.accessToken}")
             .build()
     }
 
@@ -103,8 +100,10 @@ class ProvidesMastodonStreaming @Inject constructor(
         }
     }
 
-    private fun updateSubscriptions(account: AccountEntity) {
-        val expected = setOf(StreamType.User)
+    private fun updateSubscriptions() {
+        val tabs = accountManager.activeAccount?.tabPreferences
+            ?.flatMap { StreamType.fromTabData(it) } ?: return
+        val expected = (tabs + StreamType.User).toSet()
 
         (subscribed - expected).forEach { type ->
             Log.d(TAG, "Unsubscribing from $type")
@@ -127,7 +126,7 @@ class ProvidesMastodonStreaming @Inject constructor(
                         is WebSocketEvent.OnConnectionOpened -> {
                             Log.d(TAG, "WebSocket connection opened")
                             subscribed = emptySet()
-                            updateSubscriptions(activeAccount)
+                            updateSubscriptions()
                         }
                         is WebSocketEvent.OnConnectionClosed -> {
                             Log.d(TAG, "WebSocket connection closed: ${it.shutdownReason.code} - ${it.shutdownReason.reason}")
@@ -143,12 +142,11 @@ class ProvidesMastodonStreaming @Inject constructor(
 
     private fun subscribeToAccountChanges() {
         externalScope.launch {
-            accountManager.activeAccount(externalScope)
-                .collect {
-                    if (it != null) {
-                        updateSubscriptions(it)
-                    }
+            accountManager.activeAccount(externalScope).collect {
+                if (it != null) {
+                    updateSubscriptions()
                 }
+            }
         }
     }
 

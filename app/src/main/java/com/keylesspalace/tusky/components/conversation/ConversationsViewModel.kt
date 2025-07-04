@@ -24,6 +24,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.map
 import at.connyduck.calladapter.networkresult.fold
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
+import com.keylesspalace.tusky.components.streaming.StreamingEvent
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.db.AppDatabase
 import com.keylesspalace.tusky.network.MastodonApi
@@ -38,6 +40,7 @@ class ConversationsViewModel @Inject constructor(
     private val timelineCases: TimelineCases,
     private val database: AppDatabase,
     private val api: MastodonApi,
+    private val streaming: MastodonStreaming,
     accountManager: AccountManager
 ) : ViewModel() {
 
@@ -59,6 +62,19 @@ class ConversationsViewModel @Inject constructor(
             pagingData.map { conversation -> conversation.toViewData() }
         }
         .cachedIn(viewModelScope)
+
+    fun init(isStreamingEnabled: Boolean, refreshContent: () -> Unit) {
+        if (isStreamingEnabled) {
+            viewModelScope.launch {
+                streaming.events()
+                    .collect {
+                        if (it is StreamingEvent.Conversation) {
+                            refreshContent()
+                        }
+                    }
+            }
+        }
+    }
 
     fun favourite(favourite: Boolean, conversation: ConversationViewData) {
         viewModelScope.launch {

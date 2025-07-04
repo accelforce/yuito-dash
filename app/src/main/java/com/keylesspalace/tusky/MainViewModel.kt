@@ -184,6 +184,7 @@ class MainViewModel @Inject constructor(
                     is StreamingEvent.FilterUpdated -> {
                         eventHub.dispatch(FilterUpdatedEvent(Filter.Kind.entries))
                     }
+                    else -> {}
                 }
             }
         }

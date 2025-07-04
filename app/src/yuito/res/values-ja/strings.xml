@@ -8,4 +8,6 @@
         アプリの起動中、タイムライン・通知・お知らせ・フィルターを自動更新します。
         [アカウント設定]でタブごとに個別に切り替えできます。
     </string>
+
+    <string name="toggle_streaming_title">ストリーミング</string>
 </resources>

@@ -32,6 +32,7 @@ import at.connyduck.calladapter.networkresult.onFailure
 import com.keylesspalace.tusky.appstore.EventHub
 import com.keylesspalace.tusky.components.preference.PreferencesFragment.ReadingOrder.NEWEST_FIRST
 import com.keylesspalace.tusky.components.preference.PreferencesFragment.ReadingOrder.OLDEST_FIRST
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
 import com.keylesspalace.tusky.components.timeline.LoadMorePlaceholder
 import com.keylesspalace.tusky.components.timeline.toEntity
 import com.keylesspalace.tusky.components.timeline.toViewData
@@ -40,8 +41,10 @@ import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.db.AppDatabase
 import com.keylesspalace.tusky.db.entity.HomeTimelineData
 import com.keylesspalace.tusky.db.entity.HomeTimelineEntity
+import com.keylesspalace.tusky.entity.Status
 import com.keylesspalace.tusky.network.MastodonApi
 import com.keylesspalace.tusky.usecase.TimelineCases
+import com.keylesspalace.tusky.util.isLessThanOrEqual
 import com.keylesspalace.tusky.viewdata.StatusViewData
 import com.keylesspalace.tusky.viewdata.TranslationViewData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,6 +63,7 @@ import retrofit2.HttpException
 class CachedTimelineViewModel @Inject constructor(
     timelineCases: TimelineCases,
     private val api: MastodonApi,
+    streaming: MastodonStreaming,
     eventHub: EventHub,
     accountManager: AccountManager,
     sharedPreferences: SharedPreferences,
@@ -68,6 +72,7 @@ class CachedTimelineViewModel @Inject constructor(
     timelineCases,
     eventHub,
     accountManager,
+    streaming,
     sharedPreferences
 ) {
 
@@ -293,6 +298,58 @@ class CachedTimelineViewModel @Inject constructor(
 
     override fun untranslate(status: StatusViewData.Concrete) {
         translations.value -= status.actionableId
+    }
+
+    override suspend fun onStatusUpdateReceived(status: Status) {
+        val timelineDao = db.timelineDao()
+        val accountDao = db.timelineAccountDao()
+        val statusDao = db.timelineStatusDao()
+        val account = activeAccountFlow.value ?: return
+
+        db.withTransaction {
+            val topId = timelineDao.getTopId(accountId) ?: run {
+                fullReload()
+                return@withTransaction
+            }
+
+            if (maybeInserted && topId.isLessThanOrEqual(status.id)) {
+                if (topId != status.id) {
+                    val topPlaceholderId = timelineDao.getTopPlaceholderId(accountId)
+                    if (topId != topPlaceholderId) {
+                        timelineDao.convertHomeTimelineItemToPlaceholder(topId)
+                    }
+                }
+
+                maybeInserted = false
+            }
+
+            accountDao.insert(status.account.toEntity(accountId))
+            status.reblog?.account?.toEntity(accountId)
+                ?.let { rebloggedAccount ->
+                    accountDao.insert(rebloggedAccount)
+                }
+            statusDao.insert(
+                status.actionableStatus.toEntity(
+                    tuskyAccountId = accountId,
+                    expanded = account.alwaysOpenSpoiler,
+                    contentShowing = status.shouldShowContent(account.alwaysShowSensitiveMedia, kind.toFilterKind()),
+                    contentCollapsed = true,
+                    filterActive = true,
+                )
+            )
+            timelineDao.insertHomeTimelineItem(
+                HomeTimelineEntity(
+                    tuskyAccountId = accountId,
+                    id = status.id,
+                    statusId = status.actionableId,
+                    reblogAccountId = if (status.reblog != null) {
+                        status.account.id
+                    } else {
+                        null
+                    }
+                )
+            )
+        }
     }
 
     companion object {

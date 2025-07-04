@@ -44,6 +44,7 @@ data class TabData(
     @StringRes val text: Int,
     @DrawableRes val icon: Int,
     val fragment: (List<String>) -> Fragment,
+    val isStreamingEnabled: Boolean,
     val arguments: List<String> = emptyList(),
     val title: (Context) -> String = { context -> context.getString(text) }
 ) {
@@ -54,51 +55,66 @@ data class TabData(
         other as TabData
 
         if (id != other.id) return false
-        return arguments == other.arguments
+        return arguments == other.arguments && isStreamingEnabled == other.isStreamingEnabled
     }
 
-    override fun hashCode() = Objects.hash(id, arguments)
+    override fun hashCode() = Objects.hash(id, arguments, isStreamingEnabled)
+
+    val attributes: Map<String, String?> by lazy {
+        mutableMapOf<String, String?>().apply {
+            if (isStreamingEnabled) {
+                set("s", null)
+            }
+        }
+    }
 }
 
 fun List<TabData>.hasTab(id: String): Boolean = this.any { it.id == id }
 
-fun createTabDataFromId(id: String, arguments: List<String> = emptyList()): TabData {
+fun createTabDataFromId(id: String, arguments: List<String> = emptyList(), attributes: Map<String, String?> = emptyMap()): TabData {
+    val isStreamingEnabled = attributes.containsKey("s")
     return when (id) {
         HOME -> TabData(
             id = HOME,
             text = R.string.title_home,
             icon = R.drawable.tab_icon_home,
-            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.HOME) }
+            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.HOME, isStreamingEnabled = isStreamingEnabled) },
+            isStreamingEnabled = isStreamingEnabled
         )
         NOTIFICATIONS -> TabData(
             id = NOTIFICATIONS,
             text = R.string.title_notifications,
             icon = R.drawable.tab_icon_notifications,
-            fragment = { NotificationsFragment.newInstance() }
+            fragment = { NotificationsFragment.newInstance() },
+            isStreamingEnabled = true
         )
         LOCAL -> TabData(
             id = LOCAL,
             text = R.string.title_public_local,
             icon = R.drawable.tab_icon_local,
-            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.PUBLIC_LOCAL) }
+            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.PUBLIC_LOCAL, isStreamingEnabled = isStreamingEnabled) },
+            isStreamingEnabled = isStreamingEnabled
         )
         FEDERATED -> TabData(
             id = FEDERATED,
             text = R.string.title_public_federated,
             icon = R.drawable.ic_public_24dp,
-            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.PUBLIC_FEDERATED) }
+            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.PUBLIC_FEDERATED, isStreamingEnabled = isStreamingEnabled) },
+            isStreamingEnabled = isStreamingEnabled
         )
         DIRECT -> TabData(
             id = DIRECT,
             text = R.string.title_direct_messages,
             icon = R.drawable.tab_icon_direct,
-            fragment = { ConversationsFragment.newInstance() }
+            fragment = { ConversationsFragment.newInstance(isStreamingEnabled) },
+            isStreamingEnabled = isStreamingEnabled
         )
         TRENDING_TAGS -> TabData(
             id = TRENDING_TAGS,
             text = R.string.title_public_trending_hashtags,
             icon = R.drawable.tab_icon_trending_tags,
-            fragment = { TrendingTagsFragment.newInstance() }
+            fragment = { TrendingTagsFragment.newInstance() },
+            isStreamingEnabled = false
         )
         TRENDING_STATUSES -> TabData(
             id = TRENDING_STATUSES,
@@ -106,15 +122,18 @@ fun createTabDataFromId(id: String, arguments: List<String> = emptyList()): TabD
             icon = R.drawable.tab_icon_trending_posts,
             fragment = {
                 TimelineFragment.newInstance(
-                    TimelineViewModel.Kind.PUBLIC_TRENDING_STATUSES
+                    TimelineViewModel.Kind.PUBLIC_TRENDING_STATUSES,
+                    isStreamingEnabled = false,
                 )
-            }
+            },
+            isStreamingEnabled = false
         )
         HASHTAG -> TabData(
             id = HASHTAG,
             text = R.string.hashtags,
             icon = R.drawable.ic_tag_24dp,
-            fragment = { args -> TimelineFragment.newHashtagInstance(args) },
+            fragment = { args -> TimelineFragment.newHashtagInstance(args, isStreamingEnabled) },
+            isStreamingEnabled = isStreamingEnabled,
             arguments = arguments,
             title = { context ->
                 arguments.joinToString(separator = " ") {
@@ -129,9 +148,11 @@ fun createTabDataFromId(id: String, arguments: List<String> = emptyList()): TabD
             fragment = { args ->
                 TimelineFragment.newInstance(
                     TimelineViewModel.Kind.LIST,
-                    args.getOrNull(0).orEmpty()
+                    args.getOrNull(0).orEmpty(),
+                    isStreamingEnabled = isStreamingEnabled,
                 )
             },
+            isStreamingEnabled = isStreamingEnabled,
             arguments = arguments,
             title = { arguments.getOrNull(1).orEmpty() }
         )
@@ -139,7 +160,8 @@ fun createTabDataFromId(id: String, arguments: List<String> = emptyList()): TabD
             id = BOOKMARKS,
             text = R.string.title_bookmarks,
             icon = R.drawable.tab_icon_bookmarks,
-            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.BOOKMARKS) }
+            fragment = { TimelineFragment.newInstance(TimelineViewModel.Kind.BOOKMARKS, isStreamingEnabled = false) },
+            isStreamingEnabled = false
         )
         else -> throw IllegalArgumentException("unknown tab type")
     }

@@ -86,10 +86,19 @@ class Converters @Inject constructor(
     fun stringToTabData(str: String?): List<TabData>? {
         return str?.split(";")
             ?.map {
-                val data = it.split(":")
+                val parts = it.split("@")
+                val data = parts[0].split(":")
                 createTabDataFromId(
                     data[0],
-                    data.drop(1).map { s -> URLDecoder.decode(s, "UTF-8") }
+                    data.drop(1).map { s -> URLDecoder.decode(s, "UTF-8") },
+                    parts.getOrNull(1)?.split(",")?.mapNotNull { attr ->
+                        val kv = attr.split("=")
+                        when (kv.size) {
+                            1 -> kv[0] to null
+                            2 -> kv[0] to URLDecoder.decode(kv[1], "UTF-8")
+                            else -> null
+                        }
+                    }?.toMap() ?: emptyMap()
                 )
             }
     }
@@ -98,7 +107,8 @@ class Converters @Inject constructor(
     fun tabDataToString(tabData: List<TabData>?): String? {
         // List name may include ":"
         return tabData?.joinToString(";") {
-            it.id + ":" + it.arguments.joinToString(":") { s -> URLEncoder.encode(s, "UTF-8") }
+            it.id + ":" + it.arguments.joinToString(":") { s -> URLEncoder.encode(s, "UTF-8") } +
+                "@" + it.attributes.map { (k, v) -> if (v != null) { "${k}=${v}" } else { k } }.joinToString(",")
         }
     }
 

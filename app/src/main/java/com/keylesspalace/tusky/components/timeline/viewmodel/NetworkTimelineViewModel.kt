@@ -36,6 +36,7 @@ import com.keylesspalace.tusky.appstore.PollVoteEvent
 import com.keylesspalace.tusky.appstore.StatusChangedEvent
 import com.keylesspalace.tusky.appstore.StatusDeletedEvent
 import com.keylesspalace.tusky.appstore.UnfollowEvent
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
 import com.keylesspalace.tusky.components.timeline.util.ifExpected
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.entity.Poll
@@ -66,6 +67,7 @@ import retrofit2.Response
 class NetworkTimelineViewModel @Inject constructor(
     timelineCases: TimelineCases,
     private val api: MastodonApi,
+    streaming: MastodonStreaming,
     eventHub: EventHub,
     accountManager: AccountManager,
     sharedPreferences: SharedPreferences,
@@ -73,6 +75,7 @@ class NetworkTimelineViewModel @Inject constructor(
     timelineCases,
     eventHub,
     accountManager,
+    streaming,
     sharedPreferences
 ) {
 
@@ -334,6 +337,46 @@ class NetworkTimelineViewModel @Inject constructor(
 
     override fun untranslate(status: StatusViewData.Concrete) {
         status.copy(translation = null).update()
+    }
+
+    override suspend fun onStatusUpdateReceived(status: Status) {
+        val activeAccount = accountManager.activeAccount ?: return
+
+        val topData = statusData.firstOrNull() ?: run {
+            fullReload()
+            return@onStatusUpdateReceived
+        }
+
+        if (maybeInserted && topData.id.isLessThanOrEqual(status.id)) {
+            if (topData.id != status.id) {
+                if (topData is StatusViewData.Concrete) {
+                    statusData[0] = StatusViewData.LoadMore(
+                        id = topData.id,
+                        isLoading = false
+                    )
+                }
+            }
+
+            maybeInserted = false
+        }
+
+        val index = statusData.indexOfFirst { it.id.isLessThanOrEqual(status.id) }
+        val data = status.toViewData(
+            isShowingContent = status.shouldShowContent(activeAccount.alwaysShowSensitiveMedia, kind.toFilterKind()),
+            isExpanded = activeAccount.alwaysOpenSpoiler,
+            isCollapsed = true,
+            filterKind = kind.toFilterKind(),
+            filterActive = true
+        )
+        if (index == -1) {
+            statusData.add(data)
+        } else if (statusData[index].id == data.id) {
+            statusData[index] = data
+        } else {
+            statusData.add(index, data)
+        }
+
+        currentSource?.invalidate()
     }
 
     @Throws(IOException::class, HttpException::class)

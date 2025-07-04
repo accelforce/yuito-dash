@@ -26,6 +26,9 @@ import com.keylesspalace.tusky.appstore.EventHub
 import com.keylesspalace.tusky.appstore.FilterUpdatedEvent
 import com.keylesspalace.tusky.appstore.PreferenceChangedEvent
 import com.keylesspalace.tusky.components.preference.PreferencesFragment.ReadingOrder
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
+import com.keylesspalace.tusky.components.streaming.StreamType
+import com.keylesspalace.tusky.components.streaming.StreamingEvent
 import com.keylesspalace.tusky.components.timeline.util.ifExpected
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.entity.Filter
@@ -33,14 +36,17 @@ import com.keylesspalace.tusky.entity.Status
 import com.keylesspalace.tusky.settings.PrefKeys
 import com.keylesspalace.tusky.usecase.TimelineCases
 import com.keylesspalace.tusky.viewdata.StatusViewData
+import com.tinder.scarlet.websocket.WebSocketEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 abstract class TimelineViewModel(
     protected val timelineCases: TimelineCases,
     private val eventHub: EventHub,
     val accountManager: AccountManager,
+    private val streaming: MastodonStreaming,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
@@ -63,7 +69,9 @@ abstract class TimelineViewModel(
     private var filterRemoveSelfReblogs = false
     protected var readingOrder: ReadingOrder = ReadingOrder.OLDEST_FIRST
 
-    fun init(kind: Kind, id: String?, tags: List<String>) {
+    protected var maybeInserted = true
+
+    fun init(kind: Kind, id: String?, tags: List<String>, isStreamingEnabled: Boolean) {
         this.kind = kind
         this.id = id
         this.tags = tags
@@ -95,6 +103,26 @@ abstract class TimelineViewModel(
                         }
                     }
                 }
+        }
+
+        if (isStreamingEnabled) {
+            viewModelScope.launch {
+                streaming.webSocketEvents()
+                    .filter { it is WebSocketEvent.OnConnectionOpened }
+                    .collect {
+                        maybeInserted = true
+                    }
+            }
+
+            viewModelScope.launch {
+                val types = StreamType.fromKind(kind, id, tags)
+                streaming.events()
+                    .collect {
+                        if (it is StreamingEvent.Update && types.contains(it.stream)) {
+                            onStatusUpdateReceived(it.status)
+                        }
+                    }
+            }
         }
     }
 
@@ -233,6 +261,8 @@ abstract class TimelineViewModel(
 
     abstract suspend fun translate(status: StatusViewData.Concrete): NetworkResult<Unit>
     abstract fun untranslate(status: StatusViewData.Concrete)
+
+    abstract suspend fun onStatusUpdateReceived(status: Status)
 
     companion object {
         private const val TAG = "TimelineVM"

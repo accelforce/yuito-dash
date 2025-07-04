@@ -34,6 +34,8 @@ import com.keylesspalace.tusky.appstore.EventHub
 import com.keylesspalace.tusky.appstore.FilterUpdatedEvent
 import com.keylesspalace.tusky.appstore.PreferenceChangedEvent
 import com.keylesspalace.tusky.components.preference.PreferencesFragment.ReadingOrder
+import com.keylesspalace.tusky.components.streaming.MastodonStreaming
+import com.keylesspalace.tusky.components.streaming.StreamingEvent
 import com.keylesspalace.tusky.components.systemnotifications.NotificationChannelData
 import com.keylesspalace.tusky.components.systemnotifications.toTypes
 import com.keylesspalace.tusky.components.timeline.LoadMorePlaceholder
@@ -74,6 +76,7 @@ import retrofit2.HttpException
 class NotificationsViewModel @Inject constructor(
     private val timelineCases: TimelineCases,
     private val api: MastodonApi,
+    private val streaming: MastodonStreaming,
     eventHub: EventHub,
     private val accountManager: AccountManager,
     private val preferences: SharedPreferences,
@@ -133,6 +136,14 @@ class NotificationsViewModel @Inject constructor(
                     refreshTrigger.value += 1
                 }
             }
+        }
+        viewModelScope.launch {
+            streaming.events()
+                .collect {
+                    if (it is StreamingEvent.Notification) {
+                        refreshTrigger.value++
+                    }
+                }
         }
         loadNotificationPolicy()
     }

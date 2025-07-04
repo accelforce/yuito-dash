@@ -22,9 +22,17 @@ import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.chip.Chip
+import com.keylesspalace.tusky.BOOKMARKS
+import com.keylesspalace.tusky.DIRECT
+import com.keylesspalace.tusky.FEDERATED
 import com.keylesspalace.tusky.HASHTAG
+import com.keylesspalace.tusky.HOME
 import com.keylesspalace.tusky.LIST
+import com.keylesspalace.tusky.LOCAL
+import com.keylesspalace.tusky.NOTIFICATIONS
 import com.keylesspalace.tusky.R
+import com.keylesspalace.tusky.TRENDING_STATUSES
+import com.keylesspalace.tusky.TRENDING_TAGS
 import com.keylesspalace.tusky.TabData
 import com.keylesspalace.tusky.databinding.ItemTabPreferenceBinding
 import com.keylesspalace.tusky.databinding.ItemTabPreferenceSmallBinding
@@ -40,6 +48,7 @@ interface ItemInteractionListener {
     fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
     fun onActionChipClicked(tab: TabData, tabPosition: Int)
     fun onChipClicked(tab: TabData, tabPosition: Int, chipPosition: Int)
+    fun onStreamingToggled(tab: TabData, position: Int)
 }
 
 class TabAdapter(
@@ -149,6 +158,33 @@ class TabAdapter(
                 }
             } else {
                 binding.chipGroup.hide()
+            }
+
+            when (tab.id) {
+                HOME,
+                LOCAL,
+                FEDERATED,
+                DIRECT,
+                HASHTAG,
+                LIST -> {
+                    binding.streamingChip.show()
+                    binding.streamingChip.isChecked = tab.isStreamingEnabled
+                    binding.streamingChip.setChipIconTintResource(
+                        if (tab.isStreamingEnabled) {
+                            android.R.color.transparent
+                        } else {
+                            R.color.textColorPrimary
+                        }
+                    )
+
+                    binding.streamingChip.setOnClickListener {
+                        listener.onStreamingToggled(tab, holder.bindingAdapterPosition)
+                    }
+                }
+                NOTIFICATIONS, TRENDING_TAGS, TRENDING_STATUSES, BOOKMARKS -> {
+                    binding.streamingChip.hide()
+                }
+                else -> throw IllegalArgumentException("unknown tab type")
             }
         }
     }
