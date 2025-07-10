@@ -5,13 +5,13 @@
     android:id="@+id/mainDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="@bool/is_not_edge_to_edge"
     tools:context="com.keylesspalace.tusky.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/mainCoordinatorLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="@bool/is_not_edge_to_edge">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
@@ -111,6 +111,23 @@
             android:layout_gravity="center"
             android:indeterminate="true"
             android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/composeCompactLayout"
+            style="?attr/bottomSheetStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?attr/colorSurface"
+            android:clickable="true"
+            android:focusable="true">
+
+            <com.keylesspalace.tusky.components.compose.compact.ComposeCompactView
+                android:id="@+id/composeCompact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </FrameLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

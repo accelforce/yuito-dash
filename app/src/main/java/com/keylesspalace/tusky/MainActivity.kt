@@ -53,12 +53,17 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.viewpager2.widget.MarginPageTransformer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -78,6 +83,7 @@ import com.keylesspalace.tusky.components.accountlist.AccountListActivity
 import com.keylesspalace.tusky.components.announcements.AnnouncementsActivity
 import com.keylesspalace.tusky.components.compose.ComposeActivity
 import com.keylesspalace.tusky.components.compose.ComposeActivity.Companion.canHandleMimeType
+import com.keylesspalace.tusky.components.compose.ComposeViewModel
 import com.keylesspalace.tusky.components.drafts.DraftsActivity
 import com.keylesspalace.tusky.components.login.LoginActivity
 import com.keylesspalace.tusky.components.preference.PreferencesActivity
@@ -128,6 +134,7 @@ import com.mikepenz.materialdrawer.widget.AccountHeaderView
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.migration.OptionalInject
 import javax.inject.Inject
+import kotlin.math.max
 import kotlinx.coroutines.launch
 
 @OptionalInject
@@ -224,6 +231,11 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
         }
 
         setContentView(binding.root)
+        val extras = MutableCreationExtras(defaultViewModelCreationExtras)
+        extras[ViewModelProvider.VIEW_MODEL_KEY] = "androidx.lifecycle.ViewModelProvider.DefaultKey:${ComposeViewModel::class.qualifiedName!!}"
+        binding.composeCompact.init(extras.createSavedStateHandle())
+
+        val edgeToEdge = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
 
         val bottomBarHeight = if (preferences.getString(PrefKeys.MAIN_NAV_POSITION, "top") == "bottom") {
             resources.getDimensionPixelSize(R.dimen.bottomAppBarHeight)
@@ -233,29 +245,25 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
 
         val fabMargin = resources.getDimensionPixelSize(R.dimen.fabMargin)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        var windowInsets: WindowInsetsCompat? = null
+        ViewCompat.setOnApplyWindowInsetsListener(binding.mainDrawerLayout) { view, insets ->
+            windowInsets = insets
+            adjustBottomBarHeight(edgeToEdge, bottomBarHeight, fabMargin, windowInsets)
+            ViewCompat.onApplyWindowInsets(view, insets)
+        }
+
+        binding.composeCompact.onHeightChangeListener = {
+            adjustBottomBarHeight(edgeToEdge, bottomBarHeight, fabMargin, windowInsets)
+        }
+
+        if (edgeToEdge) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.viewPager) { _, insets ->
                 val systemBarsInsets = insets.getInsets(systemBars())
                 val bottomInsets = systemBarsInsets.bottom
 
-                binding.composeButton.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                    bottomMargin = bottomBarHeight + fabMargin + bottomInsets
-                }
-                binding.mainDrawer.recyclerView.updatePadding(bottom = bottomInsets)
-
                 if (preferences.getString(PrefKeys.MAIN_NAV_POSITION, "top") == "top") {
                     insets
                 } else {
-                    binding.viewPager.updatePadding(bottom = bottomBarHeight + bottomInsets)
-
-                    /* BottomAppBar could handle size and insets automatically, but then it gets quite large,
-                       so we do it like this instead */
-                    binding.bottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        height = bottomBarHeight + bottomInsets
-                    }
-                    binding.bottomTabLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        bottomMargin = bottomInsets
-                    }
                     insets.inset(0, 0, 0, bottomInsets)
                 }
             }
@@ -264,11 +272,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
             // on Vanilla Ice Cream (API 35) and up there is no status bar color because of edge-to-edge mode
             @Suppress("DEPRECATION")
             window.statusBarColor = Color.TRANSPARENT
-
-            binding.composeButton.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                bottomMargin = bottomBarHeight + fabMargin
-            }
-            binding.viewPager.updatePadding(bottom = bottomBarHeight)
         }
 
         binding.composeButton.setOnClickListener {
@@ -350,6 +353,46 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
 
         // "Post failed" dialog should display in this activity
         draftsAlert.observeInContext(this@MainActivity, true)
+    }
+
+    private fun adjustBottomBarHeight(
+        edgeToEdge: Boolean,
+        bottomBarHeight: Int,
+        fabMargin: Int,
+        windowInsets: WindowInsetsCompat?,
+    ) {
+        if (windowInsets == null) {
+            return
+        }
+
+        val systemBarsInsets = windowInsets.getInsets(systemBars())
+        val imeInsets = windowInsets.getInsets(ime())
+        val bottomInset = max(
+            if (edgeToEdge) systemBarsInsets.bottom else 0,
+            imeInsets.bottom,
+        )
+
+        val composeCompactHeight = binding.composeCompact.measuredHeight
+
+        binding.mainDrawer.recyclerView.updatePadding(bottom = bottomInset)
+
+        binding.composeCompact.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = bottomInset
+        }
+
+        binding.bottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            height = bottomInset + composeCompactHeight + bottomBarHeight
+        }
+
+        binding.bottomTabLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = bottomInset + composeCompactHeight
+        }
+
+        binding.viewPager.updatePadding(bottom = bottomInset + composeCompactHeight + bottomBarHeight)
+
+        binding.composeButton.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            bottomMargin = bottomInset + composeCompactHeight + bottomBarHeight + fabMargin
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
