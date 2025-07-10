@@ -48,6 +48,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.Insets
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.MenuProvider
@@ -77,6 +78,7 @@ import com.keylesspalace.tusky.components.accountlist.AccountListActivity
 import com.keylesspalace.tusky.components.announcements.AnnouncementsActivity
 import com.keylesspalace.tusky.components.compose.ComposeActivity
 import com.keylesspalace.tusky.components.compose.ComposeActivity.Companion.canHandleMimeType
+import com.keylesspalace.tusky.components.compose.ComposeViewModel
 import com.keylesspalace.tusky.components.drafts.DraftsActivity
 import com.keylesspalace.tusky.components.login.LoginActivity
 import com.keylesspalace.tusky.components.preference.PreferencesActivity
@@ -152,6 +154,8 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
     lateinit var developerToolsUseCase: DeveloperToolsUseCase
 
     private val viewModel: MainViewModel by viewModels()
+
+    private val composeViewModel: ComposeViewModel by viewModels()
 
     private val binding by viewBinding(ActivityMainBinding::inflate)
 
@@ -232,29 +236,52 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
 
         val fabMargin = resources.getDimensionPixelSize(R.dimen.fabMargin)
 
+        binding.composeCompact.init(composeViewModel)
+
+        var systemBarsInsets: Insets? = null
+        binding.composeCompact.onHeightChangeListener = onHeightChangeListener@ {
+            val composeCompactHeight = binding.composeCompact.measuredHeight
+
+            val bottomInsets = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                if (systemBarsInsets == null) {
+                    return@onHeightChangeListener
+                }
+
+                systemBarsInsets!!.bottom
+            } else {
+                0
+            }
+
+            binding.composeButton.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                bottomMargin = bottomBarHeight + fabMargin + bottomInsets + composeCompactHeight
+            }
+
+            if (true) {
+                binding.viewPager.updatePadding(bottom = bottomBarHeight + bottomInsets + composeCompactHeight)
+
+                binding.bottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    height = bottomBarHeight + bottomInsets + composeCompactHeight
+                }
+
+                binding.bottomTabLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = bottomInsets + composeCompactHeight
+                }
+            }
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.viewPager) { _, insets ->
-                val systemBarsInsets = insets.getInsets(systemBars())
+                systemBarsInsets = insets.getInsets(systemBars())
                 val bottomInsets = systemBarsInsets.bottom
-
-                binding.composeButton.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                    bottomMargin = bottomBarHeight + fabMargin + bottomInsets
-                }
                 binding.mainDrawer.recyclerView.updatePadding(bottom = bottomInsets)
+
+                binding.composeCompact.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = bottomInsets
+                }
 
                 if (preferences.getString(PrefKeys.MAIN_NAV_POSITION, "top") == "top") {
                     insets
                 } else {
-                    binding.viewPager.updatePadding(bottom = bottomBarHeight + bottomInsets)
-
-                    /* BottomAppBar could handle size and insets automatically, but then it gets quite large,
-                       so we do it like this instead */
-                    binding.bottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        height = bottomBarHeight + bottomInsets
-                    }
-                    binding.bottomTabLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        bottomMargin = bottomInsets
-                    }
                     insets.inset(0, 0, 0, bottomInsets)
                 }
             }
@@ -263,11 +290,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
             // on Vanilla Ice Cream (API 35) and up there is no status bar color because of edge-to-edge mode
             @Suppress("DEPRECATION")
             window.statusBarColor = Color.TRANSPARENT
-
-            binding.composeButton.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                bottomMargin = bottomBarHeight + fabMargin
-            }
-            binding.viewPager.updatePadding(bottom = bottomBarHeight)
         }
 
         binding.composeButton.setOnClickListener {

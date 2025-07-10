@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/TuskyTextInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/composeTootButton"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.keylesspalace.tusky.components.compose.view.EditTextTyped
+            android:id="@+id/composeEditField"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:completionThreshold="2"
+            android:dropDownWidth="wrap_content"
+            android:hint="@string/hint_compose"
+            android:inputType="text|textMultiLine|textCapSentences"
+            android:lineSpacingMultiplier="1.1"
+            android:minLines="1"
+            android:nestedScrollingEnabled="false"
+            android:padding="8dp"
+            android:textColorHint="?android:attr/textColorTertiary"
+            android:textSize="?attr/status_text_large" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.keylesspalace.tusky.components.compose.view.TootButton
+        android:id="@+id/composeTootButton"
+        style="@style/TuskyButton"
+        android:layout_width="@dimen/toot_button_width"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="4dp"
+        android:textSize="?attr/status_text_medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:iconGravity="textStart"
+        app:iconSize="24dp" />
+
+</merge>

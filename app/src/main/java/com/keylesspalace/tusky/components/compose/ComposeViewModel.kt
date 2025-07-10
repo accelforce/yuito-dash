@@ -465,8 +465,8 @@ class ComposeViewModel @Inject constructor(
         }
     }
 
-    fun setup(composeOptions: ComposeActivity.ComposeOptions?) {
-        if (setupComplete) {
+    fun setup(composeOptions: ComposeActivity.ComposeOptions?, reset: Boolean = false) {
+        if (!reset && setupComplete) {
             return
         }
 

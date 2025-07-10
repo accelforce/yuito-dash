@@ -112,6 +112,23 @@
             android:indeterminate="true"
             android:visibility="gone" />
 
+        <FrameLayout
+            android:id="@+id/composeCompactLayout"
+            style="?attr/bottomSheetStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?attr/colorSurface"
+            android:clickable="true"
+            android:focusable="true">
+
+            <com.keylesspalace.tusky.components.compose.compact.ComposeCompactView
+                android:id="@+id/composeCompact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </FrameLayout>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.mikepenz.materialdrawer.widget.MaterialDrawerSliderView
