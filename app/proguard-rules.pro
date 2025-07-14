@@ -70,3 +70,11 @@
 }
 
 -checkdiscard class com.keylesspalace.tusky.usecase.DeveloperToolsUseCase
+
+# Scarlet -- Keep WebSocket annotations
+-keep class kotlinx.coroutines.flow.Flow { *; }
+-if interface * { @com.tinder.scarlet.ws.* <methods>; }
+-keep,allowobfuscation interface <1>
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @com.tinder.scarlet.ws.* <methods>;
+}
