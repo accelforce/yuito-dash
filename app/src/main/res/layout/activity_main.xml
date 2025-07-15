@@ -5,13 +5,13 @@
     android:id="@+id/mainDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="@bool/is_not_edge_to_edge"
     tools:context="com.keylesspalace.tusky.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/mainCoordinatorLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="@bool/is_not_edge_to_edge">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
