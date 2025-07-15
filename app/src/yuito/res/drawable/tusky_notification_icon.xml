@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scale xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/launcher_monochrome"
+    android:scaleGravity="center"
+    android:scaleHeight="150%"
+    android:scaleWidth="150%"
+    android:level="10000" />
