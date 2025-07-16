@@ -15,6 +15,7 @@
 
 package com.keylesspalace.tusky.util
 
+import android.text.format.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -23,17 +24,29 @@ import java.util.TimeZone
 
 class AbsoluteTimeFormatter @JvmOverloads constructor(private val tz: TimeZone = TimeZone.getDefault()) {
     private val sameDaySdf = SimpleDateFormat(
-        "HH:mm",
+        DateFormat.getBestDateTimePattern(Locale.getDefault(), "HH mm ss"),
         Locale.getDefault()
     ).apply { this.timeZone = tz }
-    private val sameYearSdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault()).apply {
+    private val sameYearSdf = SimpleDateFormat(
+        DateFormat.getBestDateTimePattern(Locale.getDefault(), "MM dd HH mm"),
+        Locale.getDefault()
+    ).apply {
         this.timeZone = tz
     }
-    private val otherYearSdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
+    private val sameYearCompleteSdf = SimpleDateFormat(
+        DateFormat.getBestDateTimePattern(Locale.getDefault(), "MM dd HH mm ss"),
+        Locale.getDefault()
+    ).apply {
+        this.timeZone = tz
+    }
+    private val otherYearSdf = SimpleDateFormat(
+        DateFormat.getBestDateTimePattern(Locale.getDefault(), "YYYY MM dd"),
+        Locale.getDefault()
+    ).apply {
         this.timeZone = tz
     }
     private val otherYearCompleteSdf = SimpleDateFormat(
-        "yyyy-MM-dd HH:mm",
+        DateFormat.getBestDateTimePattern(Locale.getDefault(), "YYYY MM dd HH mm ss"),
         Locale.getDefault()
     ).apply {
         this.timeZone = tz
@@ -44,7 +57,11 @@ class AbsoluteTimeFormatter @JvmOverloads constructor(private val tz: TimeZone =
         return when {
             time == null -> "??"
             isSameDate(time, now, tz) -> sameDaySdf.format(time)
-            isSameYear(time, now, tz) -> sameYearSdf.format(time)
+            isSameYear(time, now, tz) -> if (shortFormat) {
+                sameYearSdf.format(time)
+            } else {
+                sameYearCompleteSdf.format(time)
+            }
             shortFormat -> otherYearSdf.format(time)
             else -> otherYearCompleteSdf.format(time)
         }
