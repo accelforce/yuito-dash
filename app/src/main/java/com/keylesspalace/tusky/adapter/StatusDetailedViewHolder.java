@@ -34,7 +34,7 @@ public class StatusDetailedViewHolder extends StatusBaseViewHolder {
     private final TextView favourites;
     private final View infoDivider;
 
-    private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
+    private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT);
 
     public StatusDetailedViewHolder(@NonNull View view) {
         super(view);
