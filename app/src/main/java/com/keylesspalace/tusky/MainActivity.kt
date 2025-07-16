@@ -131,6 +131,7 @@ import com.mikepenz.materialdrawer.widget.AccountHeaderView
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.migration.OptionalInject
 import javax.inject.Inject
+import kotlin.math.max
 import kotlinx.coroutines.launch
 
 @OptionalInject
@@ -359,11 +360,10 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, MenuProvider {
 
         val systemBarsInsets = windowInsets.getInsets(systemBars())
         val imeInsets = windowInsets.getInsets(ime())
-        val bottomInset = imeInsets.bottom + if (edgeToEdge) {
-            systemBarsInsets.bottom
-        } else {
-            0
-        }
+        val bottomInset = max(
+            if (edgeToEdge) systemBarsInsets.bottom else 0,
+            imeInsets.bottom,
+        )
 
         val composeCompactHeight = binding.composeCompact.measuredHeight
 
