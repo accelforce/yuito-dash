@@ -58,7 +58,7 @@ data class TabData(
         return arguments == other.arguments && isStreamingEnabled == other.isStreamingEnabled
     }
 
-    override fun hashCode() = Objects.hash(id, arguments)
+    override fun hashCode() = Objects.hash(id, arguments, isStreamingEnabled)
 
     val attributes: Map<String, String?> by lazy {
         mutableMapOf<String, String?>().apply {

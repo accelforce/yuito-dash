@@ -30,4 +30,12 @@ class MainPagerAdapter(var tabs: List<TabData>, activity: FragmentActivity) : Cu
     }
 
     override fun getItemCount() = tabs.size
+
+    override fun getItemId(position: Int): Long {
+        return tabs[position].hashCode().toLong()
+    }
+
+    override fun containsItem(itemId: Long): Boolean {
+        return tabs.any { it.hashCode().toLong() == itemId }
+    }
 }

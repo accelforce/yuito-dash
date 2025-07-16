@@ -670,7 +670,7 @@ class TimelineFragment :
             enableSwipeToRefresh: Boolean = true
         ): TimelineFragment {
             val fragment = TimelineFragment()
-            val arguments = Bundle(3)
+            val arguments = Bundle(4)
             arguments.putString(KIND_ARG, kind.name)
             arguments.putString(ID_ARG, hashtagOrId)
             arguments.putBoolean(IS_STREAMING_ENABLED, isStreamingEnabled)
@@ -682,7 +682,7 @@ class TimelineFragment :
         @JvmStatic
         fun newHashtagInstance(hashtags: List<String>, isStreamingEnabled: Boolean = false): TimelineFragment {
             val fragment = TimelineFragment()
-            val arguments = Bundle(3)
+            val arguments = Bundle(4)
             arguments.putString(KIND_ARG, TimelineViewModel.Kind.TAG.name)
             arguments.putStringArrayList(HASHTAGS_ARG, ArrayList(hashtags))
             arguments.putBoolean(IS_STREAMING_ENABLED, isStreamingEnabled)
