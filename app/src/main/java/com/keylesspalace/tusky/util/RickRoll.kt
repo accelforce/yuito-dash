@@ -5,10 +5,7 @@ import android.content.Intent
 import androidx.core.net.toUri
 import com.keylesspalace.tusky.R
 
-fun shouldRickRoll(context: Context, domain: String) =
-    context.resources.getStringArray(R.array.rick_roll_domains).any { candidate ->
-        domain.equals(candidate, true) || domain.endsWith(".$candidate", true)
-    }
+fun shouldRickRoll(context: Context, domain: String) = false
 
 fun rickRoll(context: Context) {
     val uri = context.getString(R.string.rick_roll_url).toUri()
