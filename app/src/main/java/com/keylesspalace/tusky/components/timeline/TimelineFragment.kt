@@ -256,7 +256,7 @@ class TimelineFragment :
                 if (firstPos == 0 && positionStart == 0 && adapter.itemCount != itemCount) {
                     binding.recyclerView.post {
                         if (getView() != null) {
-                            if (isSwipeToRefreshEnabled && !isStreamingEnabled) {
+                            if (isSwipeToRefreshEnabled && !isStreamingEnabled || itemCount > 1) {
                                 binding.recyclerView.scrollBy(
                                     0,
                                     Utils.dpToPx(requireContext(), -30)
