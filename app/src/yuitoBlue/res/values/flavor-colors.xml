@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="notification_color">@color/tusky_red</color>
-
     <color name="icon_background">#FF404048</color>
     <color name="icon_foreground">#FFFFFFFF</color>
     <color name="icon_highlight">#FFFE4657</color>
