@@ -106,12 +106,12 @@ class ProvidesMastodonStreaming @Inject constructor(
         val expected = (tabs + StreamType.User).toSet()
 
         (subscribed - expected).forEach { type ->
-            Log.d(TAG, "Unsubscribing from ${type.stream}")
+            Log.d(TAG, "Unsubscribing from $type")
             streaming.send(type.unsubscribeMessage())
         }
 
         (expected - subscribed).forEach { type ->
-            Log.d(TAG, "Subscribing to ${type.stream}")
+            Log.d(TAG, "Subscribing to $type")
             streaming.send(type.subscribeMessage())
         }
 

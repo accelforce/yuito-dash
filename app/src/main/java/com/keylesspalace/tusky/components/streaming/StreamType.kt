@@ -57,6 +57,17 @@ sealed class StreamType(
         )
     }
 
+    override fun toString(): String {
+        return when (this) {
+            is User -> "User"
+            is PublicLocal -> "Public Local"
+            is Public -> "Public"
+            is Direct -> "Direct"
+            is Hashtag -> "Hashtag: $hashtag"
+            is List -> "List: $id"
+        }
+    }
+
     companion object {
         fun fromServer(args: kotlin.collections.List<String>): StreamType? {
             val type = args.firstOrNull() ?: return null
