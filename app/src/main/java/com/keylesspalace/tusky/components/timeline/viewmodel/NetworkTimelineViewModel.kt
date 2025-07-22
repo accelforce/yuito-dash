@@ -381,6 +381,8 @@ class NetworkTimelineViewModel @Inject constructor(
         } else {
             statusData.add(index, data)
         }
+
+        currentSource?.invalidate()
     }
 
     @Throws(IOException::class, HttpException::class)
