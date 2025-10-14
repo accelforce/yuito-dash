@@ -22,7 +22,7 @@ final def CUSTOM_LOGO_URL = ""
 // e.g. mastodon.social. Keep empty to not suggest any instance on the signup screen
 final def CUSTOM_INSTANCE = ""
 // link to your support account. Will be linked on the about page when not empty.
-final def SUPPORT_ACCOUNT_URL = "https://odakyu.app/@ars42525"
+final def SUPPORT_ACCOUNT_URL = "https://odakyu.app/@yuito"
 
 android {
     compileSdk 36
