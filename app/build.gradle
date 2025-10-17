@@ -82,8 +82,8 @@ android {
     productFlavors {
         yuito {
             dimension "variant"
-            versionCode 1
-            versionName "0.0"
+            versionCode 6
+            versionName "1.0"
         }
     }
 
